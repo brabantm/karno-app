@@ -1,10 +1,5 @@
-altair
 numpy
 pandas
-pydeck
 streamlit
-geopandas
-shapely
 googlemaps
-geopy
 streamlit-keyup

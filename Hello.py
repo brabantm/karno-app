@@ -13,17 +13,11 @@
 # limitations under the License.
 
 import streamlit as st
-from shapely.geometry import Point, Polygon
-import geopandas as gpd
 import pandas as pd
-import geopy
 import googlemaps
 from math import radians, sin, cos, sqrt, atan2
 
 from st_keyup import st_keyup
-
-from geopy.geocoders import Nominatim
-from geopy.extra.rate_limiter import RateLimiter
 from streamlit.logger import get_logger
 
 LOGGER = get_logger(__name__)
