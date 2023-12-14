@@ -20,6 +20,8 @@ import geopy
 import googlemaps
 from math import radians, sin, cos, sqrt, atan2
 
+from st_keyup import st_keyup
+
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 from streamlit.logger import get_logger
@@ -87,7 +89,8 @@ def run():
     """
   )
 
-  address_query = st.text_input("Entrez votre adresse", "")
+  # address_query = st.text_input("Entrez votre adresse", "")
+  address_query = st_keyup("Entrez votre addresse", key="0")
 
 
   # Display autocomplete suggestions

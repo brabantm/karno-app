@@ -7,3 +7,4 @@ geopandas
 shapely
 googlemaps
 geopy
+streamlit-keyup
