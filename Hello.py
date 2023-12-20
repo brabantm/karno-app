@@ -123,7 +123,6 @@ def run():
             map_data["color"] = [[250,0,0,0.2]] * len(map_data)
             # st.dataframe(map_data)
             # map_data = pd.concat([new_df, map_data], axis=0)
-            print(map_data.loc[len(map_data),"size"])
             map_data["size"] = 5
 
             map_data = map_data.reset_index()
