@@ -41,7 +41,6 @@ def haversine_distance(row, lat2, lon2):
     
     # Calculate the distance
     distance = R * c
-    print(distance)
     return distance
 
 def run():
@@ -105,35 +104,34 @@ def run():
           location = gmaps.place(selected_place['place_id'])['result']['geometry']['location']
           lat, lon = location['lat'], location['lng']
           
-          match = ""
-          match_min_distance = 10000
+          
           df['distance'] = df.apply(haversine_distance, args=(lat, lon), axis=1)
-          print(df.sort_values("distance").iloc[0]["Nom"])
-          map_data = df.where(df.distance < 150).dropna(how="all")
-          # Creating a new row to append
-          new_row = {'distance': 0, 'Lat': lat, "Long": lon, 'other_column': 'D'}
-          map_data = map_data.rename(columns={"Lat": "lat", "Long": "lon"})
-          print(len(map_data))
-          # map_data["color"] = list([250,0,0])
-          new_df = pd.DataFrame([{"lat": lat, "lon": lon, "color": "rgb(0,250,0)"}])
-          # st.dataframe(map_data)
-          # map_data = map_data.append(new_row, ignore_index=True)
-          # for index,row in df.iterrows():
-          #   distance = haversine_distance()
-          #   if distance < row["Rayon"]:
-          #     if distance < match_min_distance:
-          #       match = row["Nom"] if row["Nom"] != match else match
-          #       match_min_distance = distance if distance < match_min_distance else match_min_distance
+          map_data = df[df.distance < 1000]
+          
+          if len(map_data) > 0:
+              # Creating a new row to append
+            new_row = {'distance': 0, 'Lat': lat, "Long": lon, 'Rayon': 50}
+            map_data = map_data.rename(columns={"Lat": "lat", "Long": "lon"})
+            map_data["size"] = 5
+            map_data["color"] = [[250,0,0,0.2]] * len(map_data)
+            new_df = pd.Series({"lat": lat, "lon": lon, "Nom": "Test", "distance": 0,  'Rayon': 50, "size": 100, "color": [0,0,250, 0.8]})
+            # st.dataframe(map_data)
+            # map_data = pd.concat([new_df, map_data], axis=0)
+            map_data.loc[len(map_data),:] = new_df#{"lat": lat, "lon": lon, "Nom": "Test", "distance": 0,  'Rayon': 50, "size": 10, "color": [0,0,250, 0.8]}
+            print(map_data["Nom"].iloc[0])
+            st.info("Le réseau de chaleur **" + map_data["Nom"].iloc[0] + "** passera proche de chez vous. N'hésitez pas à contacter Karno pour toute question.")
+            print(map_data.head(60))
+            map_data = map_data.reset_index()
+            st.map(map_data[["lat", "color", "lon", "size"]], zoom=13, size="size", color="color")
+            st.markdown("### Légende""")
+            st.write('''- votre addresse en :blue[bleu]''')
+            st.write("""- le réseau de chaleur Karno en :red[rouge]""")
+          
+          else:
+            st.map(pd.DataFrame([{"lat": lat, "lon": lon, "Nom": "Test", "distance": 0,  'Rayon': 50}]), zoom=13)
 
-          st.info("Le réseau de chaleur **" + map_data["Nom"][0] + "** passera proche de chez vous. N'hésitez pas à contacter Karno pour toute question.")
-            # st.markdown(distance)
-          # st.markdown("distance "+ str(int(distance))+"m")
-          # Display the map centered around the selected place
-          # map_data = pd.DataFrame({'lat': [lat], 'lon': [lon]})
-
-        # Display the map centered around the selected place
-          st.map(map_data, zoom=13, size=10)
-
+          # st.write("")
+                      # - :red[le réseau Karno]")
 
 
 
