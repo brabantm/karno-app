@@ -116,23 +116,22 @@ def run():
             st.info("Aucun réseau de chaleur ne passera proche de chez vous.")
 
           if len(map_data) > 0:
+            st.markdown(''' 
+                        #### Légende
+                     - votre addresse en :blue[bleu]  
+                     - le réseau de chaleur Karno en :red[rouge]''')
+          
               # Creating a new row to append
             new_row = {'distance': 0, 'Lat': lat, "Long": lon, 'Rayon': 50}
             map_data = map_data.rename(columns={"Lat": "lat", "Long": "lon"})
             map_data["size"] = 5
             map_data["color"] = [[250,0,0,0.2]] * len(map_data)
-            # st.dataframe(map_data)
-            # map_data = pd.concat([new_df, map_data], axis=0)
-            map_data["size"] = 5
 
             map_data = map_data.reset_index()
             map_data.loc[len(map_data),:] = {"lat": lat, "lon": lon, "Nom": "Test", "distance": 0, "size": 20, 'Rayon': 50, "color": [0,0,250, 0.8]}#{"lat": lat, "lon": lon, "Nom": "Test", "distance": 0,  'Rayon': 50, "size": 10, "color": [0,0,250, 0.8]}
-            print(map_data.head(60))
+
             st.map(map_data[["lat", "color", "lon", "size"]], zoom=13, size="size", color="color")
-            st.markdown("### Légende""")
-            st.write('''- votre addresse en :blue[bleu]''')
-            st.write("""- le réseau de chaleur Karno en :red[rouge]""")
-          
+            
           else:
             st.map(pd.DataFrame([{"lat": lat, "lon": lon, "Nom": "Test", "distance": 0,  'Rayon': 50}]), zoom=13)
 
