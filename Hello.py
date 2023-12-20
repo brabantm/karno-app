@@ -108,20 +108,27 @@ def run():
           df['distance'] = df.apply(haversine_distance, args=(lat, lon), axis=1)
           map_data = df[df.distance < 1000]
           
+          if map_data["distance"].min() < 50:
+            st.success("Le réseau de chaleur **" + map_data["Nom"].iloc[0] + "** passera chez vous. N'hésitez pas à contacter Karno pour toute question.")
+          elif map_data["distance"].min() < 1000:
+            st.info("Le réseau de chaleur **" + map_data["Nom"].iloc[0] + "** passera proche de chez vous. N'hésitez pas à contacter Karno pour toute question.")
+          else:
+            st.info("Aucun réseau de chaleur ne passera proche de chez vous.")
+
           if len(map_data) > 0:
               # Creating a new row to append
             new_row = {'distance': 0, 'Lat': lat, "Long": lon, 'Rayon': 50}
             map_data = map_data.rename(columns={"Lat": "lat", "Long": "lon"})
             map_data["size"] = 5
             map_data["color"] = [[250,0,0,0.2]] * len(map_data)
-            new_df = pd.Series({"lat": lat, "lon": lon, "Nom": "Test", "distance": 0,  'Rayon': 50, "size": 100, "color": [0,0,250, 0.8]})
             # st.dataframe(map_data)
             # map_data = pd.concat([new_df, map_data], axis=0)
-            map_data.loc[len(map_data),:] = new_df#{"lat": lat, "lon": lon, "Nom": "Test", "distance": 0,  'Rayon': 50, "size": 10, "color": [0,0,250, 0.8]}
-            print(map_data["Nom"].iloc[0])
-            st.info("Le réseau de chaleur **" + map_data["Nom"].iloc[0] + "** passera proche de chez vous. N'hésitez pas à contacter Karno pour toute question.")
-            print(map_data.head(60))
+            print(map_data.loc[len(map_data),"size"])
+            map_data["size"] = 5
+
             map_data = map_data.reset_index()
+            map_data.loc[len(map_data),:] = {"lat": lat, "lon": lon, "Nom": "Test", "distance": 0, "size": 20, 'Rayon': 50, "color": [0,0,250, 0.8]}#{"lat": lat, "lon": lon, "Nom": "Test", "distance": 0,  'Rayon': 50, "size": 10, "color": [0,0,250, 0.8]}
+            print(map_data.head(60))
             st.map(map_data[["lat", "color", "lon", "size"]], zoom=13, size="size", color="color")
             st.markdown("### Légende""")
             st.write('''- votre addresse en :blue[bleu]''')
