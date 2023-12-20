@@ -22,9 +22,11 @@ from streamlit.logger import get_logger
 
 LOGGER = get_logger(__name__)
 
-def haversine_distance(lat1, lon1, lat2, lon2):
+def haversine_distance(row, lat2, lon2):
     # Radius of the Earth in meters
     R = 6371000.0
+    lat1 = row["Lat"]
+    lon1 = row["Long"]
     
     # Convert latitude and longitude from degrees to radians
     lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
@@ -39,7 +41,7 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     
     # Calculate the distance
     distance = R * c
-    
+    print(distance)
     return distance
 
 def run():
@@ -47,6 +49,8 @@ def run():
         page_title="Hello",
         page_icon="👋",
     )
+
+  df = pd.read_csv("data.csv", sep=";")
 
 
   # street = st.sidebar.text_input("Street", "75 Bay Street")
@@ -101,13 +105,34 @@ def run():
           location = gmaps.place(selected_place['place_id'])['result']['geometry']['location']
           lat, lon = location['lat'], location['lng']
           
-          distance = haversine_distance(lat, lon, 50.847732, 4.414955)
-          st.markdown("distance "+ str(int(distance))+"m")
+          match = ""
+          match_min_distance = 10000
+          df['distance'] = df.apply(haversine_distance, args=(lat, lon), axis=1)
+          print(df.sort_values("distance").iloc[0]["Nom"])
+          map_data = df.where(df.distance < 150).dropna(how="all")
+          # Creating a new row to append
+          new_row = {'distance': 0, 'Lat': lat, "Long": lon, 'other_column': 'D'}
+          map_data = map_data.rename(columns={"Lat": "lat", "Long": "lon"})
+          print(len(map_data))
+          # map_data["color"] = list([250,0,0])
+          new_df = pd.DataFrame([{"lat": lat, "lon": lon, "color": "rgb(0,250,0)"}])
+          # st.dataframe(map_data)
+          # map_data = map_data.append(new_row, ignore_index=True)
+          # for index,row in df.iterrows():
+          #   distance = haversine_distance()
+          #   if distance < row["Rayon"]:
+          #     if distance < match_min_distance:
+          #       match = row["Nom"] if row["Nom"] != match else match
+          #       match_min_distance = distance if distance < match_min_distance else match_min_distance
+
+          st.info("Le réseau de chaleur **" + map_data["Nom"][0] + "** passera proche de chez vous. N'hésitez pas à contacter Karno pour toute question.")
+            # st.markdown(distance)
+          # st.markdown("distance "+ str(int(distance))+"m")
           # Display the map centered around the selected place
-          map_data = pd.DataFrame({'lat': [lat], 'lon': [lon]})
+          # map_data = pd.DataFrame({'lat': [lat], 'lon': [lon]})
 
         # Display the map centered around the selected place
-          st.map(map_data, zoom=13, size=30, color=(200,30,30,1.0))
+          st.map(map_data, zoom=13, size=10)
 
 
 
