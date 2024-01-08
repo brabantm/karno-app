@@ -109,7 +109,7 @@ def run():
           
           
           df['distance'] = df.apply(haversine_distance, args=(lat, lon), axis=1)
-          map_data = df[df.distance < 1000]
+          map_data = df[df.distance <= 2000]
           
           if map_data["distance"].min() < 50:
             # Le réseau d'énergie thermique $$$ $$$$$ passera à côté de chez vous. Il est très probable que vous puissiez vous connecter. Contactez-nous pour entammer les démarches de connexion au réseau.
@@ -117,7 +117,7 @@ def run():
           elif map_data["distance"].min() < 500:
             # Le réseau d'énergie thermique $$$ $$$$$ est en cours de développement dans votre quartier. Vous n'êtes pas situé le long du tracé prévu mais n'hésitez à nous contacter pour évaluer la possibilité d'une extension de réseau.
             st.info(f"Le réseau d'énergie thermique **{map_data['Nom'].iloc[0]}** est en cours de développement dans votre quartier. Vous n'êtes pas situé le long du tracé prévu mais n'hésitez à [nous contacter](https://www.karno.energy/contact/) pour évaluer la possibilité d'une extension de réseau.") # OLD=Le réseau de chaleur **" + map_data["Nom"].iloc[0] + "** passera proche de chez vous. N'hésitez pas à contacter Karno pour toute question.")
-          elif map_data["distance"].min() < 2000:
+          elif map_data["distance"].min() <= 2000:
             st.info(f"Le réseau d'énergie thermique **{map_data['Nom'].iloc[0]}** est en cours de développement à proximité de chez vous. Il ne passe malheureusement pas encore dans votre quartier. Si vous êtes un grand consommateurs/producteur d'énergie thermique, [contactez-nous](https://www.karno.energy/contact/), on peut envisager une extension du réseau.")
           else: 
             st.info("Aucun réseau d'énergie thermique n'est en cours de développement à proximité de chez vous. Pour vous tenir au courant de nos prochains réseaux, n'hésitez pas à nous suivre sur [Linkedin](https://be.linkedin.com/company/karno-energy). De plus, contactez-nous si vous pensez que votre quartier bénéficierait d'un réseau de chaleur.") # OLD = Aucun réseau de chaleur ne passera proche de chez vous.")
