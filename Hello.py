@@ -53,6 +53,8 @@ def run():
 
   print(df["Nom"].nunique())
 
+  # Without Gmaps: 
+  #
   # street = st.sidebar.text_input("Street", "75 Bay Street")
   # city = st.sidebar.text_input("City", "Toronto")
   # province = st.sidebar.text_input("Province", "Ontario")
@@ -88,7 +90,7 @@ def run():
   )
 
   # address_query = st.text_input("Entrez votre adresse", "")
-  address_query = st_keyup("Entrez votre addresse", key="0")
+  address_query = st_keyup("Entrez votre adresse", key="0")
 
 
   # Display autocomplete suggestions
@@ -123,7 +125,7 @@ def run():
           if len(map_data) > 0:
             st.markdown(''' 
                         #### Légende
-                     - votre addresse en :blue[bleu]  
+                     - votre adresse en :blue[bleu]  
                      - le réseau de chaleur Karno en :red[rouge]''')
           
               # Creating a new row to append
@@ -139,11 +141,6 @@ def run():
             
           else:
             st.map(pd.DataFrame([{"lat": lat, "lon": lon, "Nom": "Test", "distance": 0,  'Rayon': 50}]), zoom=13)
-
-          # st.write("")
-                      # - :red[le réseau Karno]")
-
-
 
 
 if __name__ == "__main__":
