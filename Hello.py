@@ -67,9 +67,9 @@ def run():
   # lat = location.latitude
   # lon = location.longitude
 
-  # map_data = pd.DataFrame({'lat': [lat], 'lon': [lon]})
+  # df_close_distance = pd.DataFrame({'lat': [lat], 'lon': [lon]})
 
-  # st.map(map_data)
+  # st.map(df_close_distance)
 
   api_key = "AIzaSyAOi5CosdhIJItpyKFjD4jzXmV_MWNj-HA"
   gmaps = googlemaps.Client(key=api_key)
@@ -109,24 +109,24 @@ def run():
           
           # calcul des distances
           df['distance'] = df.apply(haversine_distance, args=(lat, lon), axis=1)
-          map_data = df[df.distance <= 2000]
+          df_close_distance = df[df.distance <= 2000]
 
           # on récupère le nom du réseau le plus proche
-          if len(map_data) > 0: nom = map_data.iloc[map_data["distance"].argmin()]["Nom"]
+          if len(df_close_distance) > 0: nom = df_close_distance.iloc[df_close_distance["distance"].argmin()]["Nom"]
           else: nom="Pas de réseau trouvé"
 
-          if map_data["distance"].min() < 50:
+          if df_close_distance["distance"].min() < 50:
             # Le réseau d'énergie thermique $$$ $$$$$ passera à côté de chez vous. Il est très probable que vous puissiez vous connecter. Contactez-nous pour entammer les démarches de connexion au réseau.
-            st.success(f"Le réseau d'énergie thermique **{nom}** passera à côté de chez vous. Il est très probable que vous puissiez vous connecter. [Contactez-nous](https://www.karno.energy/contact/) pour entammer les démarches de connexion au réseau.") #OLD = Le réseau de chaleur **" + map_data["Nom"].iloc[0] + "** passera chez vous. N'hésitez pas à contacter Karno pour toute question.")
-          elif map_data["distance"].min() < 500:
+            st.success(f"Le réseau d'énergie thermique **{nom}** passera à côté de chez vous. Il est très probable que vous puissiez vous connecter. [Contactez-nous](https://www.karno.energy/contact/) pour entammer les démarches de connexion au réseau.") #OLD = Le réseau de chaleur **" + df_close_distance["Nom"].iloc[0] + "** passera chez vous. N'hésitez pas à contacter Karno pour toute question.")
+          elif df_close_distance["distance"].min() < 500:
             # Le réseau d'énergie thermique $$$ $$$$$ est en cours de développement dans votre quartier. Vous n'êtes pas situé le long du tracé prévu mais n'hésitez à nous contacter pour évaluer la possibilité d'une extension de réseau.
-            st.info(f"Le réseau d'énergie thermique **{nom}** est en cours de développement dans votre quartier. Vous n'êtes pas situé le long du tracé prévu mais n'hésitez à [nous contacter](https://www.karno.energy/contact/) pour évaluer la possibilité d'une extension de réseau.") # OLD=Le réseau de chaleur **" + map_data["Nom"].iloc[0] + "** passera proche de chez vous. N'hésitez pas à contacter Karno pour toute question.")
-          elif map_data["distance"].min() <= 2000:
+            st.info(f"Le réseau d'énergie thermique **{nom}** est en cours de développement dans votre quartier. Vous n'êtes pas situé le long du tracé prévu mais n'hésitez à [nous contacter](https://www.karno.energy/contact/) pour évaluer la possibilité d'une extension de réseau.") # OLD=Le réseau de chaleur **" + df_close_distance["Nom"].iloc[0] + "** passera proche de chez vous. N'hésitez pas à contacter Karno pour toute question.")
+          elif df_close_distance["distance"].min() <= 2000:
             st.info(f"Le réseau d'énergie thermique **{nom}** est en cours de développement à proximité de chez vous. Il ne passe malheureusement pas encore dans votre quartier. Si vous êtes un grand consommateurs/producteur d'énergie thermique, [contactez-nous](https://www.karno.energy/contact/), on peut envisager une extension du réseau.")
           else: 
             st.info("Aucun réseau d'énergie thermique n'est en cours de développement à proximité de chez vous. Pour vous tenir au courant de nos prochains réseaux, n'hésitez pas à nous suivre sur [Linkedin](https://be.linkedin.com/company/karno-energy). De plus, contactez-nous si vous pensez que votre quartier bénéficierait d'un réseau d'énergie thermique.") # OLD = Aucun réseau de chaleur ne passera proche de chez vous.")
 
-          if len(map_data) > 0:
+          if len(df_close_distance) > 0:
             st.markdown(''' 
                         #### Légende
                      - votre adresse en :blue[bleu]  
@@ -134,14 +134,17 @@ def run():
           
               # Creating a new row to append
             # new_row = {'Nom': nom, 'distance': 0, 'Lat': lat, "Long": lon, 'Rayon': 50}
-            map_data = map_data.rename(columns={"Lat": "lat", "Long": "lon"})
-            map_data["size"] = 5
-            map_data["color"] = [[250,0,0,0.2]] * len(map_data)
+            df_close_distance = df_close_distance.rename(columns={"Lat": "lat", "Long": "lon"})
+            df_close_distance["size"] = 5
+            df_close_distance["color"] = [[250,0,0,0.2]] * len(df_close_distance)
 
-            map_data = map_data.reset_index()
-            map_data.loc[len(map_data)+1,:] = {"lat": lat, "lon": lon, "Nom": nom, "distance": 0, "size": 20, 'Rayon': 50, "color": [0,0,250, 0.8]}#{"lat": lat, "lon": lon, "Nom": "Test", "distance": 0,  'Rayon': 50, "size": 10, "color": [0,0,250, 0.8]}
-
-            st.map(map_data.where(map_data.Nom == nom).dropna(how="all")[["lat", "color", "lon", "size"]], zoom=13, size="size", color="color")
+            df_close_distance = df_close_distance.reset_index()
+            df_close_distance.loc[len(df_close_distance)+1,:] = {"lat": lat, "lon": lon, "Nom": nom, "distance": 0, "size": 20, 'Rayon': 50, "color": [0,0,250, 0.8]}#{"lat": lat, "lon": lon, "Nom": "Test", "distance": 0,  'Rayon': 50, "size": 10, "color": [0,0,250, 0.8]}
+            print("------")
+            df_to_map = df_close_distance.where(df_close_distance.Nom == nom).dropna(how="all")[["lat", "color", "lon", "size"]].reset_index()
+            df_to_map = df_to_map.reset_index()
+            # print(df[0])
+            st.map(df_to_map, zoom=13, size="size", color="color")
             
           else:
             st.map(pd.DataFrame([{"lat": lat, "lon": lon, "Nom": "Test", "distance": 0,  'Rayon': 50}]), zoom=13)
