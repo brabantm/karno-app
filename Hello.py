@@ -91,7 +91,7 @@ def run():
   # text content
   st.markdown(
       """
-      ## Les prochains réseaux d'énergie thermique Karno proche de chez moi
+      ## Les prochains réseaux d'énergie thermique Karno proches de chez moi
 
       **👇 Introduisez votre adresse ci-dessous**
     """
