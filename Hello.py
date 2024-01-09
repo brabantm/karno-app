@@ -23,6 +23,13 @@ from streamlit.logger import get_logger
 LOGGER = get_logger(__name__)
 
 def haversine_distance(row, lat2, lon2):
+    """
+    row: row of the dataframe
+    lat2: user adress
+    lon2: user adress
+
+    returns: haversine distance between the 2 points
+    """
     # Radius of the Earth in meters
     R = 6371000.0
     lat1 = row["Lat"]
@@ -45,16 +52,18 @@ def haversine_distance(row, lat2, lon2):
 
 def run():
   st.set_page_config(
-        page_title="Hello",
+        page_title="Réseaux d'énergie thermique Karno",
         page_icon="👋",
     )
 
+  # read csv file
   df = pd.read_csv("data.csv", sep=",")
 
-  print(df["Nom"].nunique())
+  # With Gmaps client for adress recovery: 
+  api_key = "AIzaSyAOi5CosdhIJItpyKFjD4jzXmV_MWNj-HA"
+  gmaps = googlemaps.Client(key=api_key)
 
   # Without Gmaps: 
-  #
   # street = st.sidebar.text_input("Street", "75 Bay Street")
   # city = st.sidebar.text_input("City", "Toronto")
   # province = st.sidebar.text_input("Province", "Ontario")
@@ -71,16 +80,15 @@ def run():
 
   # st.map(df_close_distance)
 
-  api_key = "AIzaSyAOi5CosdhIJItpyKFjD4jzXmV_MWNj-HA"
-  gmaps = googlemaps.Client(key=api_key)
 
   def autocomplete_address(query):
+      """
+      query: adress entry to autocomplete
+      """
       result = gmaps.places_autocomplete(query, components={'country': "BE"})
       return result
 
-  # df = pd.DataFrame([{"lat": 50.847671, "lon": 4.412759, "radius": 600,"color": (200,150,50,0.3)},  {"lat": 50.727671, "lon": 4.412759, "radius": 50, "color": (255,50,50,1.0)}])
-  # st.dataframe(df)
-  # st.map(df, size="radius", color="color")
+  # text content
   st.markdown(
       """
       ## Les prochains réseaux d'énergie thermique Karno proche de chez moi
@@ -89,9 +97,8 @@ def run():
     """
   )
 
-  # address_query = st.text_input("Entrez votre adresse", "")
+  # Adress entry
   address_query = st_keyup("Entrez votre adresse", key="0")
-
 
   # Display autocomplete suggestions
   if address_query:
@@ -118,34 +125,41 @@ def run():
           if df_close_distance["distance"].min() < 50:
             # Le réseau d'énergie thermique $$$ $$$$$ passera à côté de chez vous. Il est très probable que vous puissiez vous connecter. Contactez-nous pour entammer les démarches de connexion au réseau.
             st.success(f"Le réseau d'énergie thermique **{nom}** passera à côté de chez vous. Il est très probable que vous puissiez vous connecter. [Contactez-nous](https://www.karno.energy/contact/) pour entammer les démarches de connexion au réseau.") #OLD = Le réseau de chaleur **" + df_close_distance["Nom"].iloc[0] + "** passera chez vous. N'hésitez pas à contacter Karno pour toute question.")
+          
           elif df_close_distance["distance"].min() < 500:
             # Le réseau d'énergie thermique $$$ $$$$$ est en cours de développement dans votre quartier. Vous n'êtes pas situé le long du tracé prévu mais n'hésitez à nous contacter pour évaluer la possibilité d'une extension de réseau.
             st.info(f"Le réseau d'énergie thermique **{nom}** est en cours de développement dans votre quartier. Vous n'êtes pas situé le long du tracé prévu mais n'hésitez à [nous contacter](https://www.karno.energy/contact/) pour évaluer la possibilité d'une extension de réseau.") # OLD=Le réseau de chaleur **" + df_close_distance["Nom"].iloc[0] + "** passera proche de chez vous. N'hésitez pas à contacter Karno pour toute question.")
+          
           elif df_close_distance["distance"].min() <= 2000:
             st.info(f"Le réseau d'énergie thermique **{nom}** est en cours de développement à proximité de chez vous. Il ne passe malheureusement pas encore dans votre quartier. Si vous êtes un grand consommateurs/producteur d'énergie thermique, [contactez-nous](https://www.karno.energy/contact/), on peut envisager une extension du réseau.")
+          
           else: 
             st.info("Aucun réseau d'énergie thermique n'est en cours de développement à proximité de chez vous. Pour vous tenir au courant de nos prochains réseaux, n'hésitez pas à nous suivre sur [Linkedin](https://be.linkedin.com/company/karno-energy). De plus, contactez-nous si vous pensez que votre quartier bénéficierait d'un réseau d'énergie thermique.") # OLD = Aucun réseau de chaleur ne passera proche de chez vous.")
 
+          # if a heat network is found
           if len(df_close_distance) > 0:
             st.markdown(''' 
                         #### Légende
                      - votre adresse en :blue[bleu]  
                      - le réseau d'énergie thermique Karno en :red[rouge]''')
           
-              # Creating a new row to append
-            # new_row = {'Nom': nom, 'distance': 0, 'Lat': lat, "Long": lon, 'Rayon': 50}
+            # Creating a new row to append
             df_close_distance = df_close_distance.rename(columns={"Lat": "lat", "Long": "lon"})
             df_close_distance["size"] = 5
             df_close_distance["color"] = [[250,0,0,0.2]] * len(df_close_distance)
 
+            # add new row for user adress in BLUE
             df_close_distance = df_close_distance.reset_index()
             df_close_distance.loc[len(df_close_distance)+1,:] = {"lat": lat, "lon": lon, "Nom": nom, "distance": 0, "size": 20, 'Rayon': 50, "color": [0,0,250, 0.8]}#{"lat": lat, "lon": lon, "Nom": "Test", "distance": 0,  'Rayon': 50, "size": 10, "color": [0,0,250, 0.8]}
-            print("------")
-            df_to_map = df_close_distance.where(df_close_distance.Nom == nom).dropna(how="all")[["lat", "color", "lon", "size"]].reset_index()
-            df_to_map = df_to_map.reset_index()
-            # print(df[0])
+
+            # plot only the closest heat network
+            df_to_map = df_close_distance.where(df_close_distance.Nom == nom).dropna(how="all")[["lat", "color", "lon", "size"]]
+            df_to_map = df_to_map.reset_index() # correction bug rue de l'acier -> why ? -> no further study
+
+            # show map
             st.map(df_to_map, zoom=13, size="size", color="color")
-            
+          
+          # if no heat network is found, show user location
           else:
             st.map(pd.DataFrame([{"lat": lat, "lon": lon, "Nom": "Test", "distance": 0,  'Rayon': 50}]), zoom=13)
 
